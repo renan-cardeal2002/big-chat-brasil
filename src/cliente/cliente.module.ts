@@ -3,10 +3,10 @@ import { ClienteService } from './cliente.service';
 import { ClienteController } from './cliente.controller';
 import { Cliente } from './entities/cliente.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Saldo } from 'src/saldo/entities/saldo.entity';
+import { SaldoModule } from 'src/saldo/saldo.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Cliente, Saldo])],
+  imports: [TypeOrmModule.forFeature([Cliente]), SaldoModule],
   controllers: [ClienteController],
   providers: [ClienteService],
 })

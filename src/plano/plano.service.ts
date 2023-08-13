@@ -25,10 +25,10 @@ export class PlanoService {
   }
 
   update(id: number, updatePlanoDto: UpdatePlanoDto) {
-    return this.planoRepository.update(id, updatePlanoDto);
+    return this.planoRepository.update({ id_plano: id }, updatePlanoDto);
   }
 
   remove(id: number) {
-    return this.planoRepository.delete(id);
+    return this.planoRepository.delete({ id_plano: id });
   }
 }

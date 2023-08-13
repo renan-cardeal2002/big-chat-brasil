@@ -8,5 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [TypeOrmModule.forFeature([Saldo])],
   controllers: [SaldoController],
   providers: [SaldoService],
+  exports: [SaldoService],
 })
 export class SaldoModule {}

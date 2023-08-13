@@ -1,19 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMensagemDto } from './dto/create-mensagem.dto';
-import { UpdateMensagemDto } from './dto/update-mensagem.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Mensagem } from './entities/mensagem.entity';
 import { Repository } from 'typeorm';
+import { SaldoService } from 'src/saldo/saldo.service';
+import { MovimentosService } from 'src/movimentos/movimentos.service';
 
 @Injectable()
 export class MensagemService {
   constructor(
     @InjectRepository(Mensagem)
     private mensagemRepository: Repository<Mensagem>,
+    private movimentoService: MovimentosService,
   ) {}
 
-  create(createMensagemDto: CreateMensagemDto) {
-    return this.mensagemRepository.create(createMensagemDto);
+  async create(createMensagemDto: CreateMensagemDto) {
+    let valorMvto = 0.25;
+    let { id_cliente } = createMensagemDto;
+
+    let mensagem = this.mensagemRepository.create(createMensagemDto);
+    let movimento = this.movimentoService.create({
+      id_cliente,
+      descricao: 'ENVIO DE SMS',
+      tipo_mvto: 'D',
+      valor: valorMvto,
+      data_mvto: new Date(),
+    });
+
+    return { mensagem, movimento };
   }
 
   findAll() {
@@ -22,13 +36,5 @@ export class MensagemService {
 
   findOne(id: number) {
     return this.mensagemRepository.findBy({ id_sms: id });
-  }
-
-  update(id: number, updateMensagemDto: UpdateMensagemDto) {
-    return this.mensagemRepository.update(id, updateMensagemDto);
-  }
-
-  remove(id: number) {
-    return this.mensagemRepository.delete(id);
   }
 }

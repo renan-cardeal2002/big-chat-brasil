@@ -25,6 +25,6 @@ export class SaldoService {
   }
 
   update(id: number, updateSaldoDto: UpdateSaldoDto) {
-    return this.saldoRepository.update(id, updateSaldoDto);
+    return this.saldoRepository.update({ id_cliente: id }, updateSaldoDto);
   }
 }

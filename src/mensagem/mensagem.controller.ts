@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { MensagemService } from './mensagem.service';
 import { CreateMensagemDto } from './dto/create-mensagem.dto';
-import { UpdateMensagemDto } from './dto/update-mensagem.dto';
 
 @Controller('mensagem')
 export class MensagemController {
@@ -20,15 +19,5 @@ export class MensagemController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.mensagemService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMensagemDto: UpdateMensagemDto) {
-    return this.mensagemService.update(+id, updateMensagemDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.mensagemService.remove(+id);
   }
 }
