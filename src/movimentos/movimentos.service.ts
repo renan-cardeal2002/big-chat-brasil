@@ -24,6 +24,8 @@ export class MovimentosService {
 
     if (usaLim && !(await this.validaLimite(id_cliente, valor))) {
       throw new Error('Limite de saldo excedido.');
+    } else if (!usaLim && !(await this.validaTemSaldo(id_cliente, valor))) {
+      throw new Error('Valor informado é maior que o saldo disponível.');
     }
 
     const saldoAtual = await this.saldoService.findOne(id_cliente);
@@ -48,6 +50,16 @@ export class MovimentosService {
     let cliente = await this.clienteService.findOne(id_cliente);
 
     if (cliente[0].limite < valor) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  async validaTemSaldo(id_cliente: number, valor: number) {
+    const saldoAtual = await this.saldoService.findOne(id_cliente);
+
+    if (saldoAtual[0].saldo < valor) {
       return false;
     } else {
       return true;
