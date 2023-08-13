@@ -4,16 +4,24 @@ import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { Cliente } from './entities/cliente.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Saldo } from 'src/saldo/entities/saldo.entity';
 
 @Injectable()
 export class ClienteService {
   constructor(
     @InjectRepository(Cliente)
     private clienteRepository: Repository<Cliente>,
+    @InjectRepository(Saldo)
+    private saldoRepository: Repository<Saldo>,
   ) {}
 
   create(createClienteDto: CreateClienteDto) {
-    return this.clienteRepository.create(createClienteDto);
+    let cliente = this.clienteRepository.create(createClienteDto);
+    let saldo = this.saldoRepository.create({
+      id_cliente: createClienteDto.id_cliente,
+      saldo: 0,
+    });
+    return { cliente, saldo };
   }
 
   findAll(): Promise<Cliente[]> {

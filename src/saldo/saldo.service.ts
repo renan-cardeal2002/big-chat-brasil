@@ -27,8 +27,4 @@ export class SaldoService {
   update(id: number, updateSaldoDto: UpdateSaldoDto) {
     return this.saldoRepository.update(id, updateSaldoDto);
   }
-
-  remove(id: number) {
-    return this.saldoRepository.delete(id);
-  }
 }
