@@ -9,5 +9,6 @@ import { SaldoModule } from 'src/saldo/saldo.module';
   imports: [TypeOrmModule.forFeature([Movimentos]), SaldoModule],
   controllers: [MovimentosController],
   providers: [MovimentosService],
+  exports: [MovimentosService],
 })
 export class MovimentosModule {}
