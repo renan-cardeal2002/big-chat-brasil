@@ -1,26 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSaldoDto } from './dto/create-saldo.dto';
 import { UpdateSaldoDto } from './dto/update-saldo.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Saldo } from './entities/saldo.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SaldoService {
+  constructor(
+    @InjectRepository(Saldo)
+    private saldoRepository: Repository<Saldo>,
+  ) {}
+
   create(createSaldoDto: CreateSaldoDto) {
-    return 'This action adds a new saldo';
+    return this.saldoRepository.create(createSaldoDto);
   }
 
   findAll() {
-    return `This action returns all saldo`;
+    return this.saldoRepository.find();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} saldo`;
+    return this.saldoRepository.findBy({ id_cliente: id });
   }
 
   update(id: number, updateSaldoDto: UpdateSaldoDto) {
-    return `This action updates a #${id} saldo`;
+    return this.saldoRepository.update(id, updateSaldoDto);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} saldo`;
+    return this.saldoRepository.delete(id);
   }
 }

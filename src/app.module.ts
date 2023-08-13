@@ -9,6 +9,10 @@ import { MovimentosModule } from './movimentos/movimentos.module';
 import { SaldoModule } from './saldo/saldo.module';
 import { PlanoModule } from './plano/plano.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
+import { Mensagem } from './mensagem/entities/mensagem.entity';
+import { Movimentos } from './movimentos/entities/movimento.entity';
+import { Plano } from './plano/entities/plano.entity';
+import { Saldo } from './saldo/entities/saldo.entity';
 
 @Module({
   imports: [
@@ -19,7 +23,7 @@ import { UsuariosModule } from './usuarios/usuarios.module';
       username: 'root',
       password: '',
       database: 'bcb',
-      entities: [Cliente],
+      entities: [Cliente, Mensagem, Movimentos, Plano, Saldo],
       synchronize: true,
     }),
     ClienteModule,
