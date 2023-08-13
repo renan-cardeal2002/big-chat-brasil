@@ -13,7 +13,7 @@ export class UsuariosService {
   ) {}
 
   create(createUsuarioDto: CreateUsuarioDto) {
-    return this.usuarioRepository.create(createUsuarioDto);
+    return this.usuarioRepository.save(createUsuarioDto);
   }
 
   findAll() {

@@ -15,7 +15,7 @@ export class ClienteService {
   ) {}
 
   create(createClienteDto: CreateClienteDto) {
-    let cliente = this.clienteRepository.create(createClienteDto);
+    let cliente = this.clienteRepository.save(createClienteDto);
     let saldo = this.saldoService.create({
       id_cliente: createClienteDto.id_cliente,
       saldo: 0,

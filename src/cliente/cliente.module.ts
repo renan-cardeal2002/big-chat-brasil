@@ -9,5 +9,6 @@ import { SaldoModule } from 'src/saldo/saldo.module';
   imports: [TypeOrmModule.forFeature([Cliente]), SaldoModule],
   controllers: [ClienteController],
   providers: [ClienteService],
+  exports: [ClienteService],
 })
 export class ClienteModule {}

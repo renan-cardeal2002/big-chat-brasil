@@ -13,14 +13,14 @@ export class PlanoService {
   ) {}
 
   create(createPlanoDto: CreatePlanoDto) {
-    return this.planoRepository.create(createPlanoDto);
+    return this.planoRepository.save(createPlanoDto);
   }
 
-  findAll() {
+  findAll(): Promise<Plano[]> {
     return this.planoRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: number): Promise<Plano[]> {
     return this.planoRepository.findBy({ id_plano: id });
   }
 

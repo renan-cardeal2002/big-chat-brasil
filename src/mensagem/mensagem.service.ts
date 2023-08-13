@@ -15,10 +15,10 @@ export class MensagemService {
   ) {}
 
   async create(createMensagemDto: CreateMensagemDto) {
-    let valorMvto = 0.25;
+    let valorMvto = -0.25;
     let { id_cliente } = createMensagemDto;
 
-    let mensagem = this.mensagemRepository.create(createMensagemDto);
+    let mensagem = this.mensagemRepository.save(createMensagemDto);
     let movimento = this.movimentoService.create({
       id_cliente,
       descricao: 'ENVIO DE SMS',

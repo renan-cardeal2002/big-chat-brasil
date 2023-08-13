@@ -8,5 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [TypeOrmModule.forFeature([Plano])],
   controllers: [PlanoController],
   providers: [PlanoService],
+  exports: [PlanoService],
 })
 export class PlanoModule {}

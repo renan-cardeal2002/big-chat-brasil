@@ -13,7 +13,7 @@ export class SaldoService {
   ) {}
 
   create(createSaldoDto: CreateSaldoDto) {
-    return this.saldoRepository.create(createSaldoDto);
+    return this.saldoRepository.save(createSaldoDto);
   }
 
   findAll() {
