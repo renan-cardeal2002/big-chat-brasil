@@ -19,20 +19,35 @@ export class MovimentosService {
   ) {}
 
   async create(createMovimentoDto: CreateMovimentoDto) {
-    const { id_cliente, valor } = createMovimentoDto;
+    const { id_cliente, valor, tipo_mvto } = createMovimentoDto;
     const usaLim = await this.usaLimite(id_cliente);
 
-    if (usaLim && !(await this.validaLimite(id_cliente, valor))) {
+    const saldoAtual = await this.saldoService.findOne(id_cliente);
+
+    let validaLimite = await this.validaLimite(id_cliente, valor);
+    let validaSaldo = await this.validaTemSaldo(
+      id_cliente,
+      valor,
+      tipo_mvto,
+      saldoAtual[0].saldo,
+    );
+
+    if (usaLim && !validaLimite) {
       throw new Error('Limite de saldo excedido.');
-    } else if (!usaLim && !(await this.validaTemSaldo(id_cliente, valor))) {
+    } else if (!usaLim && !validaSaldo) {
       throw new Error('Valor informado é maior que o saldo disponível.');
     }
 
-    const saldoAtual = await this.saldoService.findOne(id_cliente);
-    const novoSaldo = saldoAtual[0].saldo + valor;
+    const novoSaldo = await this.calculaNovoSaldo(
+      saldoAtual[0].saldo,
+      valor,
+      tipo_mvto,
+    );
 
-    await this.saldoService.update(id_cliente, { saldo: novoSaldo });
-    return this.movimentoRepository.save(createMovimentoDto);
+    await this.saldoService.update(id_cliente, {
+      saldo: novoSaldo,
+    });
+    return await this.movimentoRepository.save(createMovimentoDto);
   }
 
   async usaLimite(id_cliente: number) {
@@ -56,21 +71,46 @@ export class MovimentosService {
     }
   }
 
-  async validaTemSaldo(id_cliente: number, valor: number) {
+  async validaTemSaldo(
+    id_cliente: number,
+    valor: number,
+    tipo_mvto: string,
+    saldo: number,
+  ) {
     const saldoAtual = await this.saldoService.findOne(id_cliente);
 
-    if (saldoAtual[0].saldo < valor) {
-      return false;
-    } else {
-      return true;
+    if (tipo_mvto == 'D') {
+      if (saldo < valor) {
+        return false;
+      } else {
+        return true;
+      }
     }
+
+    return true;
   }
 
-  findAll() {
+  async calculaNovoSaldo(
+    saldo: number,
+    valor_mvto: number,
+    tipo_mvto: string,
+  ): Promise<number> {
+    let valor: number = 0;
+
+    if (tipo_mvto == 'D') {
+      valor = saldo - valor_mvto;
+    } else {
+      valor = saldo + valor_mvto;
+    }
+
+    return valor;
+  }
+
+  findAll(): Promise<Movimentos[]> {
     return this.movimentoRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: number): Promise<Movimentos[]> {
     return this.movimentoRepository.findBy({ id_mvto: id });
   }
 

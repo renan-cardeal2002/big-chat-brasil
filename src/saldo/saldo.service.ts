@@ -16,15 +16,16 @@ export class SaldoService {
     return this.saldoRepository.save(createSaldoDto);
   }
 
-  findAll() {
+  findAll(): Promise<Saldo[]> {
     return this.saldoRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: number): Promise<Saldo[]> {
     return this.saldoRepository.findBy({ id_cliente: id });
   }
 
   update(id: number, updateSaldoDto: UpdateSaldoDto) {
+    console.log(updateSaldoDto);
     return this.saldoRepository.update({ id_cliente: id }, updateSaldoDto);
   }
 }

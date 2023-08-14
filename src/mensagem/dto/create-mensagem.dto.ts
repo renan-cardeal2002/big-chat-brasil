@@ -4,5 +4,4 @@ export class CreateMensagemDto {
   envia_whatsapp: string;
   tel_destinatario: string;
   texto: string;
-  data_envio: Date;
 }

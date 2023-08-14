@@ -3,7 +3,6 @@ import { CreateMensagemDto } from './dto/create-mensagem.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Mensagem } from './entities/mensagem.entity';
 import { Repository } from 'typeorm';
-import { SaldoService } from 'src/saldo/saldo.service';
 import { MovimentosService } from 'src/movimentos/movimentos.service';
 
 @Injectable()
@@ -15,10 +14,13 @@ export class MensagemService {
   ) {}
 
   async create(createMensagemDto: CreateMensagemDto) {
-    let valorMvto = -0.25;
+    let valorMvto = 0.25;
     let { id_cliente } = createMensagemDto;
 
-    let mensagem = this.mensagemRepository.save(createMensagemDto);
+    let mensagem = this.mensagemRepository.save({
+      ...createMensagemDto,
+      data_envio: new Date(),
+    });
     let movimento = this.movimentoService.create({
       id_cliente,
       descricao: 'ENVIO DE SMS',
