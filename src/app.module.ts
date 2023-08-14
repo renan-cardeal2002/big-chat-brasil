@@ -14,6 +14,7 @@ import { Movimentos } from './movimentos/entities/movimento.entity';
 import { Plano } from './plano/entities/plano.entity';
 import { Saldo } from './saldo/entities/saldo.entity';
 import { Usuario } from './usuarios/entities/usuario.entity';
+import { ConexaoService } from './conexao/conexao.service';
 
 @Module({
   imports: [
@@ -35,6 +36,6 @@ import { Usuario } from './usuarios/entities/usuario.entity';
     UsuariosModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConexaoService],
 })
 export class AppModule {}

@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SaldoModule } from 'src/saldo/saldo.module';
 import { PlanoModule } from 'src/plano/plano.module';
 import { ClienteModule } from 'src/cliente/cliente.module';
+import { ConexaoService } from 'src/conexao/conexao.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { ClienteModule } from 'src/cliente/cliente.module';
     ClienteModule,
   ],
   controllers: [MovimentosController],
-  providers: [MovimentosService],
+  providers: [MovimentosService, ConexaoService],
   exports: [MovimentosService],
 })
 export class MovimentosModule {}

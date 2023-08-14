@@ -3,10 +3,11 @@ import { CreateMovimentoDto } from './dto/create-movimento.dto';
 import { UpdateMovimentoDto } from './dto/update-movimento.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Movimentos } from './entities/movimento.entity';
-import { QueryRunner, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { SaldoService } from 'src/saldo/saldo.service';
 import { PlanoService } from 'src/plano/plano.service';
 import { ClienteService } from 'src/cliente/cliente.service';
+import { ConexaoService } from 'src/conexao/conexao.service';
 
 @Injectable()
 export class MovimentosService {
@@ -16,38 +17,59 @@ export class MovimentosService {
     private saldoService: SaldoService,
     private planoService: PlanoService,
     private clienteService: ClienteService,
+    private conexao: ConexaoService,
   ) {}
 
   async create(createMovimentoDto: CreateMovimentoDto) {
-    const { id_cliente, valor, tipo_mvto } = createMovimentoDto;
-    const usaLim = await this.usaLimite(id_cliente);
-
-    const saldoAtual = await this.saldoService.findOne(id_cliente);
-
-    let validaLimite = await this.validaLimite(id_cliente, valor);
-    let validaSaldo = await this.validaTemSaldo(
-      id_cliente,
-      valor,
-      tipo_mvto,
-      saldoAtual[0].saldo,
-    );
-
-    if (usaLim && !validaLimite) {
-      throw new Error('Limite de saldo excedido.');
-    } else if (!usaLim && !validaSaldo) {
-      throw new Error('Valor informado é maior que o saldo disponível.');
+    try {
+      var queryRunner = await this.conexao.getConexao();
+    } catch (error) {
+      console.log('Erro ao pegar a conexao');
     }
 
-    const novoSaldo = await this.calculaNovoSaldo(
-      saldoAtual[0].saldo,
-      valor,
-      tipo_mvto,
-    );
+    const { id_cliente, valor, tipo_mvto } = createMovimentoDto;
 
-    await this.saldoService.update(id_cliente, {
-      saldo: novoSaldo,
-    });
-    return await this.movimentoRepository.save(createMovimentoDto);
+    try {
+      await queryRunner.startTransaction();
+
+      const usaLim = await this.usaLimite(id_cliente);
+      const getSaldo = await this.saldoService.findOne(id_cliente);
+      const saldoAtual = getSaldo[0].saldo;
+
+      const validaLimite = await this.validaLimite(id_cliente, valor);
+      const validaSaldo = await this.validaTemSaldo(
+        valor,
+        tipo_mvto,
+        saldoAtual,
+      );
+
+      if (usaLim && !validaLimite) {
+        throw new Error('Limite de saldo excedido.');
+      } else if (!usaLim && !validaSaldo) {
+        throw new Error('Valor informado é maior que o saldo disponível.');
+      }
+
+      const novoSaldo = await this.calculaNovoSaldo(
+        saldoAtual,
+        valor,
+        tipo_mvto,
+      );
+
+      await this.saldoService.update(id_cliente, {
+        saldo: novoSaldo,
+      });
+
+      const movimentoSave = await this.movimentoRepository.save(
+        createMovimentoDto,
+      );
+
+      await queryRunner.commitTransaction();
+      await this.conexao.closeConexao(queryRunner);
+      return movimentoSave;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      await this.conexao.closeConexao(queryRunner);
+    }
   }
 
   async usaLimite(id_cliente: number) {
@@ -71,20 +93,15 @@ export class MovimentosService {
     }
   }
 
-  async validaTemSaldo(
-    id_cliente: number,
-    valor: number,
-    tipo_mvto: string,
-    saldo: number,
-  ) {
-    const saldoAtual = await this.saldoService.findOne(id_cliente);
-
+  async validaTemSaldo(valor: number, tipo_mvto: string, saldo: number) {
     if (tipo_mvto == 'D') {
       if (saldo < valor) {
         return false;
       } else {
         return true;
       }
+    } else if (tipo_mvto == 'C') {
+      return true;
     }
 
     return true;

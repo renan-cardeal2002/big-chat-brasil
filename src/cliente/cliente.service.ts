@@ -5,6 +5,7 @@ import { Cliente } from './entities/cliente.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SaldoService } from 'src/saldo/saldo.service';
+import { ConexaoService } from 'src/conexao/conexao.service';
 
 @Injectable()
 export class ClienteService {
@@ -12,16 +13,32 @@ export class ClienteService {
     @InjectRepository(Cliente)
     private clienteRepository: Repository<Cliente>,
     private saldoService: SaldoService,
+    private conexao: ConexaoService,
   ) {}
 
-  create(createClienteDto: CreateClienteDto) {
-    let cliente = this.clienteRepository.save(createClienteDto);
-    let saldo = this.saldoService.create({
-      id_cliente: createClienteDto.id_cliente,
-      saldo: 0,
-    });
+  async create(createClienteDto: CreateClienteDto) {
+    try {
+      var queryRunner = await this.conexao.getConexao();
+    } catch (error) {
+      console.log('Erro ao pegar a conexao');
+    }
 
-    return { cliente, saldo };
+    try {
+      await queryRunner.startTransaction();
+
+      let cliente = this.clienteRepository.save(createClienteDto);
+      let saldo = this.saldoService.create({
+        id_cliente: createClienteDto.id_cliente,
+        saldo: 0,
+      });
+
+      await queryRunner.commitTransaction();
+      await this.conexao.closeConexao(queryRunner);
+      return { cliente, saldo };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      await this.conexao.closeConexao(queryRunner);
+    }
   }
 
   findAll(): Promise<Cliente[]> {
