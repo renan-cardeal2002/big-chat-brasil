@@ -66,9 +66,10 @@ export class MovimentosService {
         });
       }
 
-      const movimentoSave = await this.movimentoRepository.save(
-        createMovimentoDto,
-      );
+      const movimentoSave = await this.movimentoRepository.save({
+        ...createMovimentoDto,
+        data_mvto: new Date(),
+      });
 
       await queryRunner.commitTransaction();
       await this.conexao.closeConexao(queryRunner);
