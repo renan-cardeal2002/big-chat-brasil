@@ -9,11 +9,7 @@ import { ErrosService } from 'src/erros/erros.service';
 import { ClienteModule } from 'src/cliente/cliente.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Mensagem]),
-    MovimentosModule,
-    ClienteModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Mensagem]), MovimentosModule],
   controllers: [MensagemController],
   providers: [MensagemService, ConexaoService, ErrosService],
 })
