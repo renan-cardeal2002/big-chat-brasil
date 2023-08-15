@@ -57,6 +57,8 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+## ENTRE EM http://localhost:3000/api para facilitar os testes.
+## O banco de dados foi feito em my sql e o script está em script.sql na raiz do projeto.
 
 ## Support
 
