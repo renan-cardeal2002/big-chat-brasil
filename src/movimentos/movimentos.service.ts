@@ -122,11 +122,22 @@ export class MovimentosService {
   }
 
   findAll(): Promise<Movimentos[]> {
-    return this.movimentoRepository.find();
+    let s_sql = `
+    select *
+      from clientes_mvto a, clientes b
+     where b.id_cliente = a.id_cliente`;
+
+    return this.movimentoRepository.query(s_sql);
   }
 
   findOne(id: number): Promise<Movimentos[]> {
-    return this.movimentoRepository.findBy({ id_mvto: id });
+    let s_sql = `
+    select *
+      from clientes_mvto a, clientes b
+     where a.id_mvto    = :id
+       and b.id_cliente = a.id_cliente`;
+
+    return this.movimentoRepository.query(s_sql, [id]);
   }
 
   update(id: number, updateMovimentoDto: UpdateMovimentoDto) {
