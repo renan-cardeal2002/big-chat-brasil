@@ -5,18 +5,18 @@ export class Mensagem {
   @PrimaryGeneratedColumn()
   id_sms: number;
 
-  @Column()
+  @Column({ nullable: false })
   id_cliente: number;
 
-  @Column()
+  @Column({ nullable: false })
   envia_whatsapp: string;
 
-  @Column()
+  @Column({ nullable: false })
   tel_destinatario: string;
 
-  @Column()
+  @Column({ nullable: false })
   texto: string;
 
-  @Column()
+  @Column({ nullable: false })
   data_envio: Date;
 }

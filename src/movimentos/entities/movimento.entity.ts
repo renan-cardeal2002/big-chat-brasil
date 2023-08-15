@@ -5,18 +5,18 @@ export class Movimentos {
   @PrimaryGeneratedColumn()
   id_mvto: number;
 
-  @Column()
+  @Column({ nullable: false })
   id_cliente: number;
 
-  @Column()
+  @Column({ nullable: false })
   descricao: string;
 
-  @Column()
+  @Column({ nullable: false })
   tipo_mvto: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   valor: number;
 
-  @Column()
+  @Column({ nullable: false })
   data_mvto: Date;
 }

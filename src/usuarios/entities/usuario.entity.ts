@@ -1,17 +1,16 @@
-import { Cliente } from 'src/cliente/entities/cliente.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('usuarios')
 export class Usuario {
   @PrimaryGeneratedColumn()
   id_usuario: number;
 
-  @Column()
+  @Column({ nullable: false })
   nome: string;
 
-  @Column()
+  @Column({ nullable: false })
   senha: string;
 
-  @OneToOne(() => Cliente, (cliente) => cliente.id_cliente)
+  @Column({ nullable: false })
   id_cliente: number;
 }

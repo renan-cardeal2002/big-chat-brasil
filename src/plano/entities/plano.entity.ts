@@ -5,9 +5,9 @@ export class Plano {
   @PrimaryGeneratedColumn()
   id_plano: number;
 
-  @Column()
+  @Column({ nullable: false })
   descricao: string;
 
-  @Column()
+  @Column({ nullable: false })
   flag_usa_limite: string;
 }

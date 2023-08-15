@@ -5,16 +5,16 @@ export class Cliente {
   @PrimaryGeneratedColumn()
   id_cliente: number;
 
-  @Column()
+  @Column({ nullable: false })
   nome: string;
 
-  @Column()
+  @Column({ nullable: false })
   tel: string;
 
-  @Column()
+  @Column({ nullable: false })
   email: string;
 
-  @Column()
+  @Column({ nullable: false })
   cpf: string;
 
   @Column()
@@ -23,7 +23,7 @@ export class Cliente {
   @Column()
   nome_empresa: string;
 
-  @Column()
+  @Column({ nullable: false })
   id_plano: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
