@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SaldoService } from 'src/saldo/saldo.service';
 import { ConexaoService } from 'src/conexao/conexao.service';
+import { UsuariosService } from 'src/usuarios/usuarios.service';
 
 @Injectable()
 export class ClienteService {
@@ -13,6 +14,7 @@ export class ClienteService {
     @InjectRepository(Cliente)
     private clienteRepository: Repository<Cliente>,
     private saldoService: SaldoService,
+    private usuarioService: UsuariosService,
     private conexao: ConexaoService,
   ) {}
 
@@ -25,16 +27,19 @@ export class ClienteService {
 
     try {
       await queryRunner.startTransaction();
+      const { id_cliente, senha, nome } = createClienteDto;
 
-      let cliente = this.clienteRepository.save(createClienteDto);
-      let saldo = this.saldoService.create({
-        id_cliente: createClienteDto.id_cliente,
-        saldo: 0,
+      const cliente = await this.clienteRepository.save(createClienteDto);
+      const saldo = await this.saldoService.create({ id_cliente, saldo: 0 });
+      const usuario = await this.usuarioService.create({
+        senha,
+        nome,
+        id_cliente,
       });
 
       await queryRunner.commitTransaction();
       await this.conexao.closeConexao(queryRunner);
-      return { cliente, saldo };
+      return { cliente, saldo, usuario };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await this.conexao.closeConexao(queryRunner);

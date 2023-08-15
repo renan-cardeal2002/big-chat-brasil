@@ -26,6 +26,6 @@ export class Cliente {
   @Column()
   id_plano: number;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   limite: number;
 }

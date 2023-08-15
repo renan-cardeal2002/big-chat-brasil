@@ -28,17 +28,24 @@ export class MensagemService {
     try {
       await queryRunner.startTransaction();
 
-      let mensagem = this.mensagemRepository.save({
-        ...createMensagemDto,
-        data_envio: new Date(),
-      });
-      let movimento = this.movimentoService.create({
+      let movimento = await this.movimentoService.create({
         id_cliente,
         descricao: 'ENVIO DE SMS',
         tipo_mvto: 'D',
         valor: valorMvto,
         data_mvto: new Date(),
       });
+
+      if (movimento.message == 'ok') {
+        var mensagem = await this.mensagemRepository.save({
+          ...createMensagemDto,
+          data_envio: new Date(),
+        });
+      } else {
+        await queryRunner.rollbackTransaction();
+        await this.conexao.closeConexao(queryRunner);
+        return { message: movimento.message };
+      }
 
       await queryRunner.commitTransaction();
       await this.conexao.closeConexao(queryRunner);

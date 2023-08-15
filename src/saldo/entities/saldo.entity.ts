@@ -7,6 +7,6 @@ export class Saldo {
   @OneToOne(() => Cliente, (cliente) => cliente.id_cliente)
   id_cliente: number;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   saldo: number;
 }

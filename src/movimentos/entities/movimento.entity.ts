@@ -14,7 +14,7 @@ export class Movimentos {
   @Column()
   tipo_mvto: string;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   valor: number;
 
   @Column()

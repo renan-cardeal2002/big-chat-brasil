@@ -8,4 +8,5 @@ export class CreateClienteDto {
   nome_empresa: string;
   id_plano: number;
   limite: number;
+  senha: string;
 }

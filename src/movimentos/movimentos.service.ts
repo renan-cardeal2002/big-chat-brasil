@@ -44,9 +44,13 @@ export class MovimentosService {
       );
 
       if (usaLim && !validaLimite) {
-        throw new Error('Limite de saldo excedido.');
+        await queryRunner.rollbackTransaction();
+        await this.conexao.closeConexao(queryRunner);
+        return { message: 'Limite de saldo excedido.' };
       } else if (!usaLim && !validaSaldo) {
-        throw new Error('Valor informado é maior que o saldo disponível.');
+        await queryRunner.rollbackTransaction();
+        await this.conexao.closeConexao(queryRunner);
+        return { message: 'Valor informado é maior que o saldo disponível.' };
       }
 
       const novoSaldo = await this.calculaNovoSaldo(
@@ -55,9 +59,12 @@ export class MovimentosService {
         tipo_mvto,
       );
 
-      await this.saldoService.update(id_cliente, {
-        saldo: novoSaldo,
-      });
+      if (!usaLim) {
+        await this.saldoService.update(id_cliente, {
+          id_cliente,
+          saldo: novoSaldo,
+        });
+      }
 
       const movimentoSave = await this.movimentoRepository.save(
         createMovimentoDto,
@@ -65,7 +72,7 @@ export class MovimentosService {
 
       await queryRunner.commitTransaction();
       await this.conexao.closeConexao(queryRunner);
-      return movimentoSave;
+      return { message: 'ok', movimentoSave };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await this.conexao.closeConexao(queryRunner);
@@ -85,6 +92,8 @@ export class MovimentosService {
 
   async validaLimite(id_cliente: number, valor: number) {
     let cliente = await this.clienteService.findOne(id_cliente);
+
+    console.log(cliente);
 
     if (cliente[0].limite < valor) {
       return false;
@@ -108,16 +117,16 @@ export class MovimentosService {
   }
 
   async calculaNovoSaldo(
-    saldo: number,
+    saldo: any,
     valor_mvto: number,
     tipo_mvto: string,
   ): Promise<number> {
-    let valor: number = 0;
+    let valor: any = 0;
 
     if (tipo_mvto == 'D') {
-      valor = saldo - valor_mvto;
+      valor = parseInt(saldo) - valor_mvto;
     } else {
-      valor = saldo + valor_mvto;
+      valor = parseInt(saldo) + valor_mvto;
     }
 
     return valor;
