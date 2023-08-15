@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { MovimentosService } from 'src/movimentos/movimentos.service';
 import { ConexaoService } from 'src/conexao/conexao.service';
 import { ErrosService } from 'src/erros/erros.service';
+import { ClienteService } from 'src/cliente/cliente.service';
 
 @Injectable()
 export class MensagemService {
@@ -15,6 +16,7 @@ export class MensagemService {
     private movimentoService: MovimentosService,
     private conexao: ConexaoService,
     private erros: ErrosService,
+    private clienteService: ClienteService,
   ) {}
 
   async create(createMensagemDto: CreateMensagemDto) {
@@ -51,10 +53,17 @@ export class MensagemService {
         data_envio: new Date(),
       });
 
+      if (createMensagemDto.envia_whatsapp == 'S') {
+        var urlWhatsapp = this.enviaWhatsapp(
+          createMensagemDto.tel_destinatario,
+          createMensagemDto.texto,
+        );
+      }
+
       await queryRunner.commitTransaction();
       await this.conexao.closeConexao(queryRunner);
 
-      return { mensagem, movimento };
+      return { mensagem, movimento, urlWhatsapp };
     } catch (error) {
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
@@ -62,6 +71,10 @@ export class MensagemService {
       await this.conexao.closeConexao(queryRunner);
       this.erros.retornaErro(error);
     }
+  }
+
+  enviaWhatsapp(tel_destinatario, texto) {
+    return `https://wa.me/55${tel_destinatario}?text=${texto}`;
   }
 
   findAll() {
