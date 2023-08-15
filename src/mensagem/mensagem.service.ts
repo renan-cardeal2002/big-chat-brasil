@@ -18,19 +18,21 @@ export class MensagemService {
   ) {}
 
   async create(createMensagemDto: CreateMensagemDto) {
+    const valorMvto = 0.25;
+    const { id_cliente } = createMensagemDto;
+    let mensagem;
+    let movimento;
+
     try {
       var queryRunner = await this.conexao.getConexao();
     } catch (error) {
       console.log('Erro ao pegar a conexao');
     }
 
-    let valorMvto = 0.25;
-    let { id_cliente } = createMensagemDto;
-
     try {
       await queryRunner.startTransaction();
 
-      let movimento = await this.movimentoService.create({
+      movimento = await this.movimentoService.create({
         id_cliente,
         descricao: 'ENVIO DE SMS',
         tipo_mvto: 'D',
@@ -38,22 +40,25 @@ export class MensagemService {
         data_mvto: new Date(),
       });
 
-      if (movimento.message == 'ok') {
-        var mensagem = await this.mensagemRepository.save({
-          ...createMensagemDto,
-          data_envio: new Date(),
-        });
-      } else {
+      if (movimento.message !== 'ok') {
         await queryRunner.rollbackTransaction();
         await this.conexao.closeConexao(queryRunner);
         return { message: movimento.message };
       }
 
+      mensagem = await this.mensagemRepository.save({
+        ...createMensagemDto,
+        data_envio: new Date(),
+      });
+
       await queryRunner.commitTransaction();
       await this.conexao.closeConexao(queryRunner);
+
       return { mensagem, movimento };
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       await this.conexao.closeConexao(queryRunner);
       this.erros.retornaErro(error);
     }

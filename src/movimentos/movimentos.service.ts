@@ -23,17 +23,15 @@ export class MovimentosService {
   ) {}
 
   async create(createMovimentoDto: CreateMovimentoDto) {
+    const { id_cliente, valor, tipo_mvto } = createMovimentoDto;
+
     try {
       var queryRunner = await this.conexao.getConexao();
     } catch (error) {
       console.log('Erro ao pegar a conexao');
     }
 
-    const { id_cliente, valor, tipo_mvto } = createMovimentoDto;
-
     try {
-      await queryRunner.startTransaction();
-
       const usaLim = await this.usaLimite(id_cliente);
       const getSaldo = await this.saldoService.findOne(id_cliente);
       const saldoAtual = getSaldo[0].saldo;
@@ -45,15 +43,15 @@ export class MovimentosService {
         saldoAtual,
       );
 
-      if (usaLim && !validaLimite) {
-        await queryRunner.rollbackTransaction();
-        await this.conexao.closeConexao(queryRunner);
-        return { message: 'Limite de saldo excedido.' };
-      } else if (!usaLim && !validaSaldo) {
-        await queryRunner.rollbackTransaction();
-        await this.conexao.closeConexao(queryRunner);
-        return { message: 'Valor informado é maior que o saldo disponível.' };
+      if ((usaLim && !validaLimite) || (!usaLim && !validaSaldo)) {
+        return {
+          message: usaLim
+            ? 'Limite de saldo excedido.'
+            : 'Valor informado é maior que o saldo disponível.',
+        };
       }
+
+      await queryRunner.startTransaction();
 
       const novoSaldo = await this.calculaNovoSaldo(
         saldoAtual,
@@ -74,49 +72,40 @@ export class MovimentosService {
 
       await queryRunner.commitTransaction();
       await this.conexao.closeConexao(queryRunner);
+
       return { message: 'ok', movimentoSave };
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       await this.conexao.closeConexao(queryRunner);
       this.erros.retornaErro(error);
     }
   }
 
-  async usaLimite(id_cliente: number) {
-    let cliente = await this.clienteService.findOne(id_cliente);
-    let plano = await this.planoService.findOne(cliente[0].id_plano);
+  async usaLimite(id_cliente: number): Promise<boolean> {
+    const cliente = await this.clienteService.findOne(id_cliente);
+    const plano = await this.planoService.findOne(cliente[0].id_plano);
 
-    if (plano[0].flag_usa_limite == 'S') {
-      return true;
-    } else {
-      return false;
-    }
+    return plano[0].flag_usa_limite === 'S';
   }
 
-  async validaLimite(id_cliente: number, valor: number) {
-    let cliente = await this.clienteService.findOne(id_cliente);
+  async validaLimite(id_cliente: number, valor: number): Promise<boolean> {
+    const cliente = await this.clienteService.findOne(id_cliente);
 
-    console.log(cliente);
-
-    if (cliente[0].limite < valor) {
-      return false;
-    } else {
-      return true;
-    }
+    return cliente[0].limite >= valor;
   }
 
-  async validaTemSaldo(valor: number, tipo_mvto: string, saldo: number) {
-    if (tipo_mvto == 'D') {
-      if (saldo < valor) {
-        return false;
-      } else {
-        return true;
-      }
-    } else if (tipo_mvto == 'C') {
+  async validaTemSaldo(
+    valor: number,
+    tipo_mvto: string,
+    saldo: number,
+  ): Promise<boolean> {
+    if (tipo_mvto === 'D') {
+      return saldo >= valor;
+    } else if (tipo_mvto === 'C') {
       return true;
     }
-
-    return true;
   }
 
   async calculaNovoSaldo(
@@ -124,15 +113,11 @@ export class MovimentosService {
     valor_mvto: number,
     tipo_mvto: string,
   ): Promise<number> {
-    let valor: any = 0;
-
-    if (tipo_mvto == 'D') {
-      valor = parseInt(saldo) - valor_mvto;
+    if (tipo_mvto === 'D') {
+      return parseInt(saldo) - valor_mvto;
     } else {
-      valor = parseInt(saldo) + valor_mvto;
+      return parseInt(saldo) + valor_mvto;
     }
-
-    return valor;
   }
 
   findAll(): Promise<Movimentos[]> {
