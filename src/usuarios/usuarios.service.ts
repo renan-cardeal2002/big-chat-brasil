@@ -24,6 +24,10 @@ export class UsuariosService {
     return this.usuarioRepository.findBy({ id_usuario: id });
   }
 
+  login(usuario: string, senha: string) {
+    return this.usuarioRepository.findBy({ nome: usuario, senha });
+  }
+
   update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
     return this.usuarioRepository.update({ id_usuario: id }, updateUsuarioDto);
   }
