@@ -8,6 +8,7 @@ import { SaldoService } from 'src/saldo/saldo.service';
 import { PlanoService } from 'src/plano/plano.service';
 import { ClienteService } from 'src/cliente/cliente.service';
 import { ConexaoService } from 'src/conexao/conexao.service';
+import { ErrosService } from 'src/erros/erros.service';
 
 @Injectable()
 export class MovimentosService {
@@ -18,6 +19,7 @@ export class MovimentosService {
     private planoService: PlanoService,
     private clienteService: ClienteService,
     private conexao: ConexaoService,
+    private erros: ErrosService,
   ) {}
 
   async create(createMovimentoDto: CreateMovimentoDto) {
@@ -76,6 +78,7 @@ export class MovimentosService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await this.conexao.closeConexao(queryRunner);
+      this.erros.retornaErro(error);
     }
   }
 

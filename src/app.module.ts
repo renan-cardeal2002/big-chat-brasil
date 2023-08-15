@@ -15,6 +15,7 @@ import { Plano } from './plano/entities/plano.entity';
 import { Saldo } from './saldo/entities/saldo.entity';
 import { Usuario } from './usuarios/entities/usuario.entity';
 import { ConexaoService } from './conexao/conexao.service';
+import { ErrosService } from './erros/erros.service';
 
 @Module({
   imports: [
@@ -36,6 +37,6 @@ import { ConexaoService } from './conexao/conexao.service';
     UsuariosModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ConexaoService],
+  providers: [AppService, ConexaoService, ErrosService],
 })
 export class AppModule {}

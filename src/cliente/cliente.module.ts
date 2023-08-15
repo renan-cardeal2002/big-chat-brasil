@@ -6,11 +6,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SaldoModule } from 'src/saldo/saldo.module';
 import { ConexaoService } from 'src/conexao/conexao.service';
 import { UsuariosModule } from 'src/usuarios/usuarios.module';
+import { ErrosService } from 'src/erros/erros.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Cliente]), SaldoModule, UsuariosModule],
   controllers: [ClienteController],
-  providers: [ClienteService, ConexaoService],
+  providers: [ClienteService, ConexaoService, ErrosService],
   exports: [ClienteService],
 })
 export class ClienteModule {}

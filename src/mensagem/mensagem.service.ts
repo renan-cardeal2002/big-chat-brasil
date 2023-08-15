@@ -5,6 +5,7 @@ import { Mensagem } from './entities/mensagem.entity';
 import { Repository } from 'typeorm';
 import { MovimentosService } from 'src/movimentos/movimentos.service';
 import { ConexaoService } from 'src/conexao/conexao.service';
+import { ErrosService } from 'src/erros/erros.service';
 
 @Injectable()
 export class MensagemService {
@@ -13,6 +14,7 @@ export class MensagemService {
     private mensagemRepository: Repository<Mensagem>,
     private movimentoService: MovimentosService,
     private conexao: ConexaoService,
+    private erros: ErrosService,
   ) {}
 
   async create(createMensagemDto: CreateMensagemDto) {
@@ -53,6 +55,7 @@ export class MensagemService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await this.conexao.closeConexao(queryRunner);
+      this.erros.retornaErro(error);
     }
   }
 

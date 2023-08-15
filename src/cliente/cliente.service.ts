@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { Cliente } from './entities/cliente.entity';
@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { SaldoService } from 'src/saldo/saldo.service';
 import { ConexaoService } from 'src/conexao/conexao.service';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
+import { ErrosService } from 'src/erros/erros.service';
 
 @Injectable()
 export class ClienteService {
@@ -16,6 +17,7 @@ export class ClienteService {
     private saldoService: SaldoService,
     private usuarioService: UsuariosService,
     private conexao: ConexaoService,
+    private erros: ErrosService,
   ) {}
 
   async create(createClienteDto: CreateClienteDto) {
@@ -43,6 +45,7 @@ export class ClienteService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await this.conexao.closeConexao(queryRunner);
+      this.erros.retornaErro(error);
     }
   }
 
