@@ -49,12 +49,25 @@ export class ClienteService {
     }
   }
 
-  findAll(): Promise<Cliente[]> {
-    return this.clienteRepository.find();
+  findAll() {
+    try {
+      let s_sql = `
+      select * from clientes a, clientes_saldo s
+       where s.id_cliente = a.id_cliente`;
+
+      return this.clienteRepository.query(s_sql);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  findOne(id: number): Promise<Cliente[]> {
-    return this.clienteRepository.findBy({ id_cliente: id });
+  findOne(id: number) {
+    let s_sql = `
+    select * from clientes a, clientes_saldo s
+     where a.id_cliente = :id
+       and s.id_cliente = a.id_cliente`;
+
+    return this.clienteRepository.query(s_sql, [id]);
   }
 
   update(id: number, updateClienteDto: UpdateClienteDto) {
